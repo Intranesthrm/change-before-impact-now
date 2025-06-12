@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				climate: {
+					earth: '#8B5A3C',
+					forest: '#2D5016',
+					ocean: '#1E40AF',
+					sky: '#0EA5E9',
+					leaf: '#16A34A',
+					sunset: '#EA580C'
 				}
 			},
 			borderRadius: {
@@ -84,11 +93,47 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'float': {
+					'0%, 100%': {
+						transform: 'translateY(0px)'
+					},
+					'50%': {
+						transform: 'translateY(-10px)'
+					}
+				},
+				'fade-in-up': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(30px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'scale-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'scale(0.9)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'scale(1)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'float': 'float 3s ease-in-out infinite',
+				'fade-in-up': 'fade-in-up 0.6s ease-out',
+				'scale-in': 'scale-in 0.4s ease-out'
+			},
+			backgroundImage: {
+				'climate-gradient': 'linear-gradient(135deg, #16A34A 0%, #0EA5E9 50%, #2D5016 100%)',
+				'earth-gradient': 'linear-gradient(135deg, #8B5A3C 0%, #16A34A 50%, #0EA5E9 100%)',
+				'action-gradient': 'linear-gradient(135deg, #EA580C 0%, #16A34A 100%)'
 			}
 		}
 	},
