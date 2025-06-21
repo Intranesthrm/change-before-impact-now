@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Slider } from "@/components/ui/slider";
 
 const GetInvolved = () => {
-  const [rating, setRating] = useState([5]);
+  const [rating, setRating] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     location: "",
@@ -17,10 +17,11 @@ const GetInvolved = () => {
     message: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showThankYou, setShowThankYou] = useState(false);
   const { toast } = useToast();
 
-  const currentRating = rating[0];
-  const isLowEngagement = currentRating <= 5;
+  const isLowEngagement = rating !== null && rating <= 5;
+  const emojis = ['😠', '😞', '😕', '😐', '😶', '🙃', '🙂', '😊', '😄', '🤝'];
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -33,15 +34,15 @@ const GetInvolved = () => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    toast({
-      title: isLowEngagement ? "Thank you for your feedback!" : "Welcome to the movement! 🌍",
-      description: isLowEngagement 
-        ? "Your honest response helps us improve our approach."
-        : "You'll receive more information about how to get involved soon!",
-    });
-
-    console.log("Get Involved submission:", { rating: currentRating, ...formData });
+    console.log("Get Involved submission:", { rating, ...formData });
     setIsSubmitting(false);
+    setShowThankYou(true);
+  };
+
+  const handleJoinWhatsApp = () => {
+    // Open WhatsApp group link
+    window.open("https://chat.whatsapp.com/your-group-link", "_blank");
+    setShowThankYou(false);
   };
 
   return (
@@ -61,7 +62,7 @@ const GetInvolved = () => {
                 Join our team of dedicated volunteers working on ground-level interventions 
                 across rural communities.
               </p>
-              <Button className="bg-green-600 hover:bg-green-700">
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => toast({ title: "Volunteer interest noted!" })}>
                 Become a Volunteer
               </Button>
             </div>
@@ -73,7 +74,7 @@ const GetInvolved = () => {
                 Collaborate with us as an organization or institution to scale our impact 
                 and create sustainable solutions.
               </p>
-              <Button className="bg-blue-600 hover:bg-blue-700">
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => toast({ title: "Partnership interest noted!" })}>
                 Partner With Us
               </Button>
             </div>
@@ -85,7 +86,7 @@ const GetInvolved = () => {
                 Support our mission financially to help us expand our reach and 
                 create more sustainable village ecosystems.
               </p>
-              <Button className="bg-orange-600 hover:bg-orange-700">
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => toast({ title: "Thank you for your donation interest!" })}>
                 Make a Donation
               </Button>
             </div>
@@ -102,7 +103,7 @@ const GetInvolved = () => {
               Be part of the "Change Before Climate Change" initiative and help us create 
               a nationwide movement for environmental action.
             </p>
-            <Button className="bg-red-600 hover:bg-red-700 text-white">
+            <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={() => window.location.href = '/cbcc'}>
               Learn More About CBCC
             </Button>
           </div>
@@ -122,135 +123,182 @@ const GetInvolved = () => {
             
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Rating Slider */}
+                {/* Emoji Rating Buttons */}
                 <div className="space-y-4">
                   <div className="text-center">
                     <span className="text-2xl font-bold text-green-800">
-                      Rating: {currentRating}/10
+                      {rating ? `Rating: ${rating}/10` : 'Select your rating'}
                     </span>
                   </div>
-                  <Slider
-                    value={rating}
-                    onValueChange={setRating}
-                    max={10}
-                    min={1}
-                    step={1}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-sm text-gray-500">
-                    <span>1 - Not connected</span>
-                    <span>10 - Deeply committed</span>
+                  <div className="grid grid-cols-5 md:grid-cols-10 gap-4">
+                    {emojis.map((emoji, index) => {
+                      const ratingValue = index + 1;
+                      const isSelected = rating === ratingValue;
+                      
+                      return (
+                        <button
+                          key={ratingValue}
+                          type="button"
+                          className={`text-4xl md:text-5xl p-3 rounded-xl transition-all transform hover:scale-110 ${
+                            isSelected 
+                              ? 'bg-green-500 shadow-xl scale-110' 
+                              : 'hover:bg-green-100'
+                          }`}
+                          onClick={() => setRating(ratingValue)}
+                        >
+                          <div className="text-center">
+                            <div>{emoji}</div>
+                            <div className="text-sm font-bold text-green-800 mt-1">
+                              {ratingValue}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 {/* Form Fields with Conditional Styling */}
-                <div className={`space-y-6 p-6 rounded-lg ${
-                  isLowEngagement ? 'bg-red-50 border-2 border-red-200' : 'bg-green-50 border-2 border-green-200'
-                }`}>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${
-                        isLowEngagement ? 'text-red-700' : 'text-green-700'
-                      }`}>
-                        Your Name *
-                      </label>
-                      <Input
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) => handleInputChange("name", e.target.value)}
-                        placeholder="Your full name"
-                        className={isLowEngagement ? 'border-red-300 focus:border-red-500' : 'border-green-300 focus:border-green-500'}
-                        required
-                      />
+                {rating && (
+                  <div className={`space-y-6 p-6 rounded-lg ${
+                    isLowEngagement ? 'bg-red-50 border-2 border-red-200' : 'bg-green-50 border-2 border-green-200'
+                  }`}>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${
+                          isLowEngagement ? 'text-red-700' : 'text-green-700'
+                        }`}>
+                          Your Name *
+                        </label>
+                        <Input
+                          type="text"
+                          value={formData.name}
+                          onChange={(e) => handleInputChange("name", e.target.value)}
+                          placeholder="Your full name"
+                          className={isLowEngagement ? 'border-red-300 focus:border-red-500' : 'border-green-300 focus:border-green-500'}
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${
+                          isLowEngagement ? 'text-red-700' : 'text-green-700'
+                        }`}>
+                          Location *
+                        </label>
+                        <Input
+                          type="text"
+                          value={formData.location}
+                          onChange={(e) => handleInputChange("location", e.target.value)}
+                          placeholder="City, State"
+                          className={isLowEngagement ? 'border-red-300 focus:border-red-500' : 'border-green-300 focus:border-green-500'}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${
+                          isLowEngagement ? 'text-red-700' : 'text-green-700'
+                        }`}>
+                          Phone Number *
+                        </label>
+                        <Input
+                          type="tel"
+                          value={formData.phone}
+                          onChange={(e) => handleInputChange("phone", e.target.value)}
+                          placeholder="+91-XXXXXXXXXX"
+                          className={isLowEngagement ? 'border-red-300 focus:border-red-500' : 'border-green-300 focus:border-green-500'}
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className={`block text-sm font-medium mb-2 ${
+                          isLowEngagement ? 'text-red-700' : 'text-green-700'
+                        }`}>
+                          Email ID *
+                        </label>
+                        <Input
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => handleInputChange("email", e.target.value)}
+                          placeholder="your.email@example.com"
+                          className={isLowEngagement ? 'border-red-300 focus:border-red-500' : 'border-green-300 focus:border-green-500'}
+                          required
+                        />
+                      </div>
                     </div>
 
                     <div>
                       <label className={`block text-sm font-medium mb-2 ${
                         isLowEngagement ? 'text-red-700' : 'text-green-700'
                       }`}>
-                        Location *
+                        {isLowEngagement 
+                          ? "Can you share why you feel disconnected or less engaged with our mission?"
+                          : "Can you share why you feel connected with our mission?"
+                        }
                       </label>
-                      <Input
-                        type="text"
-                        value={formData.location}
-                        onChange={(e) => handleInputChange("location", e.target.value)}
-                        placeholder="City, State"
-                        className={isLowEngagement ? 'border-red-300 focus:border-red-500' : 'border-green-300 focus:border-green-500'}
+                      <Textarea
+                        value={formData.message}
+                        onChange={(e) => handleInputChange("message", e.target.value)}
+                        placeholder="Share your thoughts..."
+                        className={`min-h-[120px] ${
+                          isLowEngagement ? 'border-red-300 focus:border-red-500' : 'border-green-300 focus:border-green-500'
+                        }`}
                         required
                       />
                     </div>
+
+                    <Button 
+                      type="submit" 
+                      className={`w-full py-3 text-lg ${
+                        isLowEngagement 
+                          ? 'bg-red-600 hover:bg-red-700' 
+                          : 'bg-green-600 hover:bg-green-700'
+                      } text-white`}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Submitting..." : "Submit Response"}
+                    </Button>
                   </div>
-
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${
-                        isLowEngagement ? 'text-red-700' : 'text-green-700'
-                      }`}>
-                        Phone Number *
-                      </label>
-                      <Input
-                        type="tel"
-                        value={formData.phone}
-                        onChange={(e) => handleInputChange("phone", e.target.value)}
-                        placeholder="+91-XXXXXXXXXX"
-                        className={isLowEngagement ? 'border-red-300 focus:border-red-500' : 'border-green-300 focus:border-green-500'}
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className={`block text-sm font-medium mb-2 ${
-                        isLowEngagement ? 'text-red-700' : 'text-green-700'
-                      }`}>
-                        Email ID *
-                      </label>
-                      <Input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
-                        placeholder="your.email@example.com"
-                        className={isLowEngagement ? 'border-red-300 focus:border-red-500' : 'border-green-300 focus:border-green-500'}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${
-                      isLowEngagement ? 'text-red-700' : 'text-green-700'
-                    }`}>
-                      {isLowEngagement 
-                        ? "Can you share why you feel disconnected or less engaged with our mission?"
-                        : "Can you share why you feel connected with our mission?"
-                      }
-                    </label>
-                    <Textarea
-                      value={formData.message}
-                      onChange={(e) => handleInputChange("message", e.target.value)}
-                      placeholder="Share your thoughts..."
-                      className={`min-h-[120px] ${
-                        isLowEngagement ? 'border-red-300 focus:border-red-500' : 'border-green-300 focus:border-green-500'
-                      }`}
-                      required
-                    />
-                  </div>
-
-                  <Button 
-                    type="submit" 
-                    className={`w-full py-3 text-lg ${
-                      isLowEngagement 
-                        ? 'bg-red-600 hover:bg-red-700' 
-                        : 'bg-green-600 hover:bg-green-700'
-                    } text-white`}
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Submitting..." : "Submit Response"}
-                  </Button>
-                </div>
+                )}
               </form>
             </CardContent>
           </Card>
         </section>
+
+        {/* Thank You Dialog */}
+        <Dialog open={showThankYou} onOpenChange={setShowThankYou}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold text-green-800 text-center">
+                Thank You! 🌍
+              </DialogTitle>
+            </DialogHeader>
+            <div className="text-center space-y-4">
+              <p className="text-lg text-gray-700">
+                Your response has been recorded. Together, we can make a real difference!
+              </p>
+              <div className="space-y-3">
+                <Button 
+                  onClick={handleJoinWhatsApp}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                >
+                  Join Our WhatsApp Group 📱
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowThankYou(false)}
+                  className="w-full"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

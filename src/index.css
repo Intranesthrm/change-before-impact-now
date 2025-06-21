@@ -108,3 +108,8 @@
 .floating-element {
   @apply animate-float;
 }
+
+/* Climate gradient background */
+.bg-climate-gradient {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 50%, #166534 100%);
+}
